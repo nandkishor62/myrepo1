@@ -1,0 +1,25 @@
+1.	!STEP 1:
+2.	 
+3.	 feature otv
+4.	 
+5.	 !STEP 2:
+6.	 interface Overlay1
+7.	 
+8.	 !STEP 3:
+9.	 interface Ethernet1/9
+10.	   ip igmp version 3
+11.	  
+12.	 !STEP 4:
+13.	  otv join-interface Ethernet1/9
+14.	 
+15.	 !STEP 5:
+16.	   otv control-group 239.1.1.1
+17.	   otv data-group 232.1.1.0/24
+18.	 
+19.	 !STEP 6:
+20.	   otv extend-vlan 110
+21.	 
+22.	 !STEP 8:
+23.	 otv site-vlan 200
+
+
