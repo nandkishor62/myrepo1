@@ -1,0 +1,412 @@
+https://www.cisco.com/c/en/us/support/docs/cloud-systems-management/application-policy-infrastructure-controller-apic/213618-aci-upgrade-best-practices-and-troublesh.html
+
+System Classes
+The system qos is a type of MQC target. You use a service policy to associate a policy map with the system
+qos target. A system qos policy applies to all interfaces on the device unless a specific interface has an
+overriding service-policy configuration. The system qos policies are used to define system classes, the classes
+of traffic across the entire device, and their attributes.
+If service policies are configured at the interface level, the interface-level policy always takes precedence
+over the system class configuration or defaults.
+When you configure QoS features, and the system requests MQC objects, you can use system-defined MQC
+objects for 4q mode or system-defined objects for 8q mode.
+On the Cisco Nexus device, a system class is uniquely identified by a qos-group value. A total of four system
+classes are supported. The device supports one default class which is always present on the device. Up to
+three additional system classes can be created by the administrator. Only egress queuing, network-qos, and
+type qos for FEX policies are supported on the system QoS target.
+
+
+
+switch# qos copy policy-map type network-qos default-8q-nq-policy prefix my
+switch# show policy-map type network-qos
+Type network-qos policy-maps
+============================
+policy-map type network-qos my8q-nq
+class type network-qos c-8q-nq7
+mtu 1500
+class type network-qos c-8q-nq6
+mtu 1500
+class type network-qos c-8q-nq5
+mtu 1500
+class type network-qos c-8q-nq4
+mtu 1500
+class type network-qos c-8q-nq3
+mtu 1500
+class type network-qos c-8q-nq2
+mtu 1500
+class type network-qos c-8q-nq1
+mtu 1500
+class type network-qos c-8q-nq-default
+mtu 1500
+switch# config t
+switch(config)# policy-map type network-qos my8q-nq
+switch(config-pmap-nqos)# class type network-qos c-8q-nq1
+switch(config-pmap-nqos-c)# mtu 9216
+switch(config-pmap-nqos-c)# class type network-qos c-8q-nq2
+switch(config-pmap-nqos-c)# mtu 2240
+switch(config-pmap-nqos-c)# class type network-qos c-8q-nq4
+switch(config-pmap-nqos-c)# pause pfc-cos 4
+switch(config-pmap-nqos-c)# class type network-qos c-8q-nq5
+switch(config-pmap-nqos-c)# mtu 2240
+switch(config-pmap-nqos-c)# pause pfc-cos 5
+switch(config-pmap-nqos-c)# class type network-qos c-8q-nq6
+switch(config-pmap-nqos-c)# mtu 9216
+switch(config-pmap-nqos-c)# pause pfc-cos 6
+switch(config-pmap-nqos-c)# show policy-map type network-qos my8q-nq
+Type network-qos policy-maps
+============================
+policy-map type network-qos my8q-nq
+class type network-qos c-8q-nq7
+mtu 1500
+class type network-qos c-8q-nq6
+pause pfc-cos 6
+mtu 9216
+class type network-qos c-8q-nq5
+pause pfc-cos 5
+mtu 2240
+class type network-qos c-8q-nq4
+pause pfc-cos 4
+mtu 1500
+class type network-qos c-8q-nq3
+mtu 1500
+class type network-qos c-8q-nq2
+mtu 2240
+class type network-qos c-8q-nq1
+mtu 9216
+class type network-qos c-8q-nq-default
+mtu 1500
+switch(config)# system qos
+switch(config-sys-qos)# service-policy type network-qos my8q-nq
+switch(config-sys-qos)# 2014 Jun 12 11:13:48 switch %$ VDC-1 %$
+%IPQOSMGR-2-QOSMGR_NETWORK_QOS_POLICY_CHANGE: Policy my8q-nq is now active
+switch(config-sys-qos)# show policy-map system type network-qos
+Type network-qos policy-maps
+============================
+policy-map type network-qos my8q-nq
+class type network-qos c-8q-nq7
+match qos-group 7
+mtu 1500
+class type network-qos c-8q-nq6
+match qos-group 6
+pause pfc-cos 6
+mtu 9216
+class type network-qos c-8q-nq5
+match qos-group 5
+pause pfc-cos 5
+mtu 2240
+class type network-qos c-8q-nq4
+match qos-group 4
+pause pfc-cos 4
+mtu 1500
+class type network-qos c-8q-nq3
+match qos-group 3
+mtu 1500
+class type network-qos c-8q-nq2
+match qos-group 2
+mtu 2240
+class type network-qos c-8q-nq1
+match qos-group 1
+mtu 9216
+class type network-qos c-8q-nq-default
+match qos-group 0
+mtu 1500
+
+
+---------
+
+switch# qos copy policy-map type queuing default-8q-out-policy prefix my
+switch# show policy-map type queuing my8q-out
+Type queuing policy-maps
+========================
+policy-map type queuing my8q-out
+class type queuing c-out-8q-q7
+priority level 1
+class type queuing c-out-8q-q6
+bandwidth remaining percent 0
+class type queuing c-out-8q-q5
+bandwidth remaining percent 0
+class type queuing c-out-8q-q4
+bandwidth remaining percent 0
+class type queuing c-out-8q-q3
+bandwidth remaining percent 0
+class type queuing c-out-8q-q2
+bandwidth remaining percent 0
+class type queuing c-out-8q-q1
+bandwidth remaining percent 0
+class type queuing c-out-8q-q-default
+bandwidth remaining percent 100
+switch# config t
+switch(config)# policy-map type queuing my8q-out
+switch(config-pmap-c-que)# class type queuing c-out-8q-q-default
+switch(config-pmap-c-que)# bandwidth remaining percent 30
+switch(config-pmap-c-que)# class type queuing c-out-8q-q1
+switch(config-pmap-c-que)# bandwidth remaining percent 15
+switch(config-pmap-c-que)# class type queuing c-out-8q-q2
+switch(config-pmap-c-que)# bandwidth remaining percent 15
+switch(config-pmap-c-que)# class type queuing c-out-8q-q3
+switch(config-pmap-c-que)# bandwidth remaining percent 10
+switch(config-pmap-c-que)# class type queuing c-out-8q-q4
+switch(config-pmap-c-que)# bandwidth remaining percent 10
+switch(config-pmap-c-que)# class type queuing c-out-8q-q5
+switch(config-pmap-c-que)# bandwidth remaining percent 10
+switch(config-pmap-c-que)# class type queuing c-out-8q-q6
+switch(config-pmap-c-que)# bandwidth remaining percent 10
+switch(config-pmap-c-que)# show policy-map type queuing my8q-out
+
+Type queuing policy-maps
+========================
+policy-map type queuing my8q-out
+class type queuing c-out-8q-q7
+priority level 1
+class type queuing c-out-8q-q6
+bandwidth remaining percent 10
+class type queuing c-out-8q-q5
+bandwidth remaining percent 10
+class type queuing c-out-8q-q4
+bandwidth remaining percent 10
+class type queuing c-out-8q-q3
+bandwidth remaining percent 10
+class type queuing c-out-8q-q2
+bandwidth remaining percent 15
+class type queuing c-out-8q-q1
+bandwidth remaining percent 15
+class type queuing c-out-8q-q-default
+bandwidth remaining percent 30
+switch(config)# system qos
+switch(config-sys-qos)# service-policy type queuing output my8q-out
+
+Example of set qos-groups
+The following is an example to set qos-groups with values 4-7.
+switch(config)# policy-map p1
+switch(config-pmap-qos)# class c1
+switch(config-pmap-c-qos)# set qos-group 1
+switch(config-pmap-c-qos)# ex
+switch(config-pmap-qos)# class c2
+switch(config-pmap-c-qos)# set qos-group 4
+switch(config-pmap-c-qos)# ex
+switch(config-pmap-qos)# class c3
+switch(config-pmap-c-qos)# set qos-group 7
+switch(config-pmap-c-qos)# ex
+switch(config-pmap-qos)# ex
+switch(config)# show policy-map p1
+Type qos policy-maps
+====================
+policy-map type qos p1
+class c1
+set qos-group 1
+class c2
+set qos-group 4
+class c3
+set qos-group 7
+switch(config)# conf t
+switch(config)# int ethernet 2/1
+switch(config-if)# service-policy type qos input p1
+
+
+
+
+https://www.cisco.com/c/en/us/support/docs/cloud-systems-management/application-policy-infrastructure-controller-apic/213618-aci-upgrade-best-practices-and-troublesh.html
+
+System Classes
+The system qos is a type of MQC target. You use a service policy to associate a policy map with the system
+qos target. A system qos policy applies to all interfaces on the device unless a specific interface has an
+overriding service-policy configuration. The system qos policies are used to define system classes, the classes
+of traffic across the entire device, and their attributes.
+If service policies are configured at the interface level, the interface-level policy always takes precedence
+over the system class configuration or defaults.
+When you configure QoS features, and the system requests MQC objects, you can use system-defined MQC
+objects for 4q mode or system-defined objects for 8q mode.
+On the Cisco Nexus device, a system class is uniquely identified by a qos-group value. A total of four system
+classes are supported. The device supports one default class which is always present on the device. Up to
+three additional system classes can be created by the administrator. Only egress queuing, network-qos, and
+type qos for FEX policies are supported on the system QoS target.
+
+
+
+switch# qos copy policy-map type network-qos default-8q-nq-policy prefix my
+switch# show policy-map type network-qos
+Type network-qos policy-maps
+============================
+policy-map type network-qos my8q-nq
+class type network-qos c-8q-nq7
+mtu 1500
+class type network-qos c-8q-nq6
+mtu 1500
+class type network-qos c-8q-nq5
+mtu 1500
+class type network-qos c-8q-nq4
+mtu 1500
+class type network-qos c-8q-nq3
+mtu 1500
+class type network-qos c-8q-nq2
+mtu 1500
+class type network-qos c-8q-nq1
+mtu 1500
+class type network-qos c-8q-nq-default
+mtu 1500
+switch# config t
+switch(config)# policy-map type network-qos my8q-nq
+switch(config-pmap-nqos)# class type network-qos c-8q-nq1
+switch(config-pmap-nqos-c)# mtu 9216
+switch(config-pmap-nqos-c)# class type network-qos c-8q-nq2
+switch(config-pmap-nqos-c)# mtu 2240
+switch(config-pmap-nqos-c)# class type network-qos c-8q-nq4
+switch(config-pmap-nqos-c)# pause pfc-cos 4
+switch(config-pmap-nqos-c)# class type network-qos c-8q-nq5
+switch(config-pmap-nqos-c)# mtu 2240
+switch(config-pmap-nqos-c)# pause pfc-cos 5
+switch(config-pmap-nqos-c)# class type network-qos c-8q-nq6
+switch(config-pmap-nqos-c)# mtu 9216
+switch(config-pmap-nqos-c)# pause pfc-cos 6
+switch(config-pmap-nqos-c)# show policy-map type network-qos my8q-nq
+Type network-qos policy-maps
+============================
+policy-map type network-qos my8q-nq
+class type network-qos c-8q-nq7
+mtu 1500
+class type network-qos c-8q-nq6
+pause pfc-cos 6
+mtu 9216
+class type network-qos c-8q-nq5
+pause pfc-cos 5
+mtu 2240
+class type network-qos c-8q-nq4
+pause pfc-cos 4
+mtu 1500
+class type network-qos c-8q-nq3
+mtu 1500
+class type network-qos c-8q-nq2
+mtu 2240
+class type network-qos c-8q-nq1
+mtu 9216
+class type network-qos c-8q-nq-default
+mtu 1500
+switch(config)# system qos
+switch(config-sys-qos)# service-policy type network-qos my8q-nq
+switch(config-sys-qos)# 2014 Jun 12 11:13:48 switch %$ VDC-1 %$
+%IPQOSMGR-2-QOSMGR_NETWORK_QOS_POLICY_CHANGE: Policy my8q-nq is now active
+switch(config-sys-qos)# show policy-map system type network-qos
+Type network-qos policy-maps
+============================
+policy-map type network-qos my8q-nq
+class type network-qos c-8q-nq7
+match qos-group 7
+mtu 1500
+class type network-qos c-8q-nq6
+match qos-group 6
+pause pfc-cos 6
+mtu 9216
+class type network-qos c-8q-nq5
+match qos-group 5
+pause pfc-cos 5
+mtu 2240
+class type network-qos c-8q-nq4
+match qos-group 4
+pause pfc-cos 4
+mtu 1500
+class type network-qos c-8q-nq3
+match qos-group 3
+mtu 1500
+class type network-qos c-8q-nq2
+match qos-group 2
+mtu 2240
+class type network-qos c-8q-nq1
+match qos-group 1
+mtu 9216
+class type network-qos c-8q-nq-default
+match qos-group 0
+mtu 1500
+
+
+---------
+
+switch# qos copy policy-map type queuing default-8q-out-policy prefix my
+switch# show policy-map type queuing my8q-out
+Type queuing policy-maps
+========================
+policy-map type queuing my8q-out
+class type queuing c-out-8q-q7
+priority level 1
+class type queuing c-out-8q-q6
+bandwidth remaining percent 0
+class type queuing c-out-8q-q5
+bandwidth remaining percent 0
+class type queuing c-out-8q-q4
+bandwidth remaining percent 0
+class type queuing c-out-8q-q3
+bandwidth remaining percent 0
+class type queuing c-out-8q-q2
+bandwidth remaining percent 0
+class type queuing c-out-8q-q1
+bandwidth remaining percent 0
+class type queuing c-out-8q-q-default
+bandwidth remaining percent 100
+switch# config t
+switch(config)# policy-map type queuing my8q-out
+switch(config-pmap-c-que)# class type queuing c-out-8q-q-default
+switch(config-pmap-c-que)# bandwidth remaining percent 30
+switch(config-pmap-c-que)# class type queuing c-out-8q-q1
+switch(config-pmap-c-que)# bandwidth remaining percent 15
+switch(config-pmap-c-que)# class type queuing c-out-8q-q2
+switch(config-pmap-c-que)# bandwidth remaining percent 15
+switch(config-pmap-c-que)# class type queuing c-out-8q-q3
+switch(config-pmap-c-que)# bandwidth remaining percent 10
+switch(config-pmap-c-que)# class type queuing c-out-8q-q4
+switch(config-pmap-c-que)# bandwidth remaining percent 10
+switch(config-pmap-c-que)# class type queuing c-out-8q-q5
+switch(config-pmap-c-que)# bandwidth remaining percent 10
+switch(config-pmap-c-que)# class type queuing c-out-8q-q6
+switch(config-pmap-c-que)# bandwidth remaining percent 10
+switch(config-pmap-c-que)# show policy-map type queuing my8q-out
+
+Type queuing policy-maps
+========================
+policy-map type queuing my8q-out
+class type queuing c-out-8q-q7
+priority level 1
+class type queuing c-out-8q-q6
+bandwidth remaining percent 10
+class type queuing c-out-8q-q5
+bandwidth remaining percent 10
+class type queuing c-out-8q-q4
+bandwidth remaining percent 10
+class type queuing c-out-8q-q3
+bandwidth remaining percent 10
+class type queuing c-out-8q-q2
+bandwidth remaining percent 15
+class type queuing c-out-8q-q1
+bandwidth remaining percent 15
+class type queuing c-out-8q-q-default
+bandwidth remaining percent 30
+switch(config)# system qos
+switch(config-sys-qos)# service-policy type queuing output my8q-out
+
+Example of set qos-groups
+The following is an example to set qos-groups with values 4-7.
+switch(config)# policy-map p1
+switch(config-pmap-qos)# class c1
+switch(config-pmap-c-qos)# set qos-group 1
+switch(config-pmap-c-qos)# ex
+switch(config-pmap-qos)# class c2
+switch(config-pmap-c-qos)# set qos-group 4
+switch(config-pmap-c-qos)# ex
+switch(config-pmap-qos)# class c3
+switch(config-pmap-c-qos)# set qos-group 7
+switch(config-pmap-c-qos)# ex
+switch(config-pmap-qos)# ex
+switch(config)# show policy-map p1
+Type qos policy-maps
+====================
+policy-map type qos p1
+class c1
+set qos-group 1
+class c2
+set qos-group 4
+class c3
+set qos-group 7
+switch(config)# conf t
+switch(config)# int ethernet 2/1
+switch(config-if)# service-policy type qos input p1
+
+
+
+
